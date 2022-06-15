@@ -1,10 +1,4 @@
 import streamlit as st
-
-st.title('500k Analytics')
-
-# streamlit_app.py
-
-import streamlit as st
 from google.oauth2 import service_account
 from gsheetsdb import connect
 
@@ -27,6 +21,9 @@ def run_query(query):
 
 sheet_url = st.secrets["private_gsheets_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
+
+# body
+st.title('500k Analytics')
 
 # Print results.
 for row in rows:
