@@ -1,6 +1,7 @@
 from ast import Str
 import google_auth_httplib2
 import httplib2
+import numpy as np
 import pandas as pd
 import streamlit as st
 from google.oauth2 import service_account
@@ -85,6 +86,6 @@ data = get_data(gsheet_connector)
 
 st.dataframe(data)
 
-print(data)
+#print(data)
 
 #st.title(data[''])
