@@ -1,0 +1,4 @@
+Notes
+
+Googlesheets data obtained using the methodology below:
+https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
