@@ -5,3 +5,5 @@ https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
 
 Streamlit Aggrid
 https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
+
+Add password for pages 
