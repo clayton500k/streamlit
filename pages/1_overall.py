@@ -1,4 +1,3 @@
-#%% Load
 import google_auth_httplib2
 import httplib2
 import numpy as np
@@ -13,21 +12,6 @@ from decimal import Decimal
 import plotly.express as px
 from st_aggrid import AgGrid
 
-#settings
-#st.set_page_config(layout="wide")
-
-SCOPE = "https://www.googleapis.com/auth/spreadsheets"
-SPREADSHEET_ID = "1uAa3CbD5uYpdEQs3RXenCb5trLqnZGbOtqfaxUhcp0E"
-SHEET_NAME = "Bank"
-GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
-
-def StringToDec(x):
-    if x == '':
-        return np.nan
-    else:
-        return float(Decimal(x)) 
-
-@st.experimental_singleton()
 def connect_to_gsheet():
     # Create a connection object.
     credentials = service_account.Credentials.from_service_account_info(
@@ -78,51 +62,46 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 
     return df
 
+def StringToDec(x):
+    if x == '':
+        return np.nan
+    else:
+        return float(Decimal(x)) 
+
+# Donation Matrix by Individual
+def overall_page():
 #%% Retrive Data
-gsheet_connector = connect_to_gsheet()
-data = get_data(gsheet_connector)
+    gsheet_connector = connect_to_gsheet()
+    data = get_data(gsheet_connector)
 
 #%% Donation Analysis
 
-#Donation Matrix Overall 
-@st.cache
-def overall_data():
-    DMY = data.groupby(['Y']).sum().reset_index()
-    DMY = pd.melt(DMY,id_vars = ['Y'],var_name='Group')
+    #Donation Matrix Overall 
+    @st.cache
+    def overall_data():
+        DMY = data.groupby(['Y']).sum().reset_index()
+        DMY = pd.melt(DMY,id_vars = ['Y'],var_name='Group')
 
-    fig = px.bar(DMY, x="Y", y="value",
-                color='Group', barmode='group',
-                height=400)
+        fig = px.bar(DMY, x="Y", y="value",
+                    color='Group', barmode='group',
+                    height=400)
+        
+        return fig
     
-    return fig
+    fig = overall_data()
 
-# Donation Matrix by Individual
-@st.cache
-def individual_data():
-    return data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+    st.plotly_chart(fig, use_container_width=True)
 
-#%% Dashboard Body
-st.title('500k Analytics')
-st.write(f"This app shows how a Streamlit app can interact easily with a [Google Sheet]({GSHEET_URL}) to read or store data.")
+st.set_page_config(page_title="Overall", page_icon="📈")
 
-st.title('Donation Matrix')
+st.markdown('Overall')
 
-st.subheader('Overall')
+st.sidebar.header("Overall")
 
-fig = overall_data()
+#settings
+SCOPE = "https://www.googleapis.com/auth/spreadsheets"
+SPREADSHEET_ID = "1uAa3CbD5uYpdEQs3RXenCb5trLqnZGbOtqfaxUhcp0E"
+SHEET_NAME = "Bank"
+GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
 
-st.plotly_chart(fig, use_container_width=True)
-
-st.subheader('By Individual')
-
-DM = individual_data()
-
-individual = st.selectbox('',DM['Renamer'].unique(),index=list(DM['Renamer'].unique()).index('Edward Foster')) #header instructs
-
-view_individual_data = DM[DM['Renamer']==individual]
-
-st.plotly_chart(px.bar(view_individual_data, x="Y", y="Credit Amount", color="Source Type", height=400))
-
-AgGrid(view_individual_data)
-
-# %%
+overall_page()
