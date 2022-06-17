@@ -120,10 +120,15 @@ def run():
         if 'password_check' not in st.session_state:
             st.session_state.password_check = 'correct'
 
-        #%% Retrive Data
+        #%% Overall Data
         if 'data' not in st.session_state:
             gsheet_connector = connect_to_gsheet()
             st.session_state.data = get_data(gsheet_connector)
 
+        #%% Individual Data
+        if 'DM' not in st.session_state:
+            data = st.session_state.data
+            st.session_state.DM = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+        
 if __name__ == "__main__":
     run()

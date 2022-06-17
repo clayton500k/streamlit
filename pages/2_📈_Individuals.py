@@ -1,27 +1,13 @@
-import google_auth_httplib2
-import httplib2
 import numpy as np
 import pandas as pd
 import streamlit as st
-import math
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import HttpRequest
-from re import sub
-from decimal import Decimal
 import plotly.express as px
 from st_aggrid import AgGrid
 
 # Donation Matrix by Individual
 def individuals_page():
 
-    data = st.session_state.data
-    
-    @st.cache
-    def individual_data():
-        return data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
-
-    DM = individual_data()
+    DM = data = st.session_state.DM
 
     individual = st.selectbox('',DM['Renamer'].unique(),index=list(DM['Renamer'].unique()).index('Edward Foster')) #header instructs
 
