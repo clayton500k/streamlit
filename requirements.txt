@@ -69,11 +69,7 @@ nbformat==5.1.3
 nest-asyncio==1.5.4
 notebook==6.4.8
 numexpr==2.8.1
-<<<<<<< HEAD
 numpy==1.22.4
-=======
-numpy==1.21.2
->>>>>>> c24f175263f9cc0eb3795a3d06c46bf68b58d5ea
 oauth2client==4.1.3
 packaging==21.3
 pandas==1.4.1
