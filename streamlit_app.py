@@ -1,4 +1,3 @@
-#%% Load
 import google_auth_httplib2
 import httplib2
 import numpy as np
