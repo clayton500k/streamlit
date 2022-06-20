@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import math
+import plotly.express as px
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import HttpRequest
 from re import sub
 from decimal import Decimal
-import plotly.express as px
 from st_aggrid import AgGrid
 
 #settings
