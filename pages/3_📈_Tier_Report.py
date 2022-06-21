@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from st_aggrid import AgGrid
+from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 def categorize_donor(x):
     if x >= 50000:
@@ -20,40 +22,39 @@ def categorize_donor(x):
 def tier_page():
 
     DM = st.session_state.DM
-    DM = DM.sort_values(by=['Credit Amount'], ascending=False) #order
+    DM = DM.sort_values(by=['Credit Amount'], ascending=False)
     DM['Category'] = DM['Credit Amount'].apply(categorize_donor)
     DM = DM.drop(columns=['Debit Amount'])
+    DM = DM[DM['Credit Amount']!=0] #eliminate zeros to reduce table length
 
-    # Choose Year
+    # User Input Year
     year_list = [2018,2019,2020,2021,2022]
     select_year = st.selectbox('Select Year',year_list,year_list.index(2022))
 
-    cat1 = DM[(DM['Y']==select_year) & (DM['Category']==1)]
-    cat1_total = cat1['Credit Amount'].sum()
-    st.markdown(f'### Tier 1 Table (£50k+): Total = {cat1_total}')
-    st.dataframe(cat1)
+    for i in range(4):
+        df = DM[(DM['Y']==select_year) & (DM['Category']==(i+1))]
+        df_total = pd.to_numeric(df['Credit Amount'].sum())
+        df['Credit Amount'] = df['Credit Amount'].apply(lambda x: "${:,.2f}".format(float(x)))
+        
+        st.markdown(f'### Tier {(i+1)} Table: Total = ${df_total:,.2f}')
 
-    cat2 = DM[(DM['Y']==select_year) & (DM['Category']==2)]
-    cat2_total = cat2['Credit Amount'].sum()
-    st.markdown(f'### Tier 2 Table (£20k+): Total = {cat2_total}')
-    st.dataframe(cat2)
+        #Left align
+        def left_align(s, props='text-align: left;'):
+            return props
 
-    cat3 = DM[(DM['Y']==select_year) & (DM['Category']==3)]
-    cat3_total = cat3['Credit Amount'].sum()
-    st.markdown(f'### Tier 3 Table (£2k+): Total = {cat3_total}')
-    st.dataframe(cat3)
+        #Add pagination
+        # gb = GridOptionsBuilder.from_dataframe(df)
+        # gb.configure_pagination()
+        # gridOptions = gb.build()
 
-    cat4 = DM[(DM['Y']==select_year) & (DM['Category']==4)]
-    cat4_total = cat4['Credit Amount'].sum()
-    st.markdown(f'### Tier 4 Table (£400+): Total = {cat4_total}')
-    st.dataframe(cat4)
+        AgGrid(
+        df, 
+        fit_columns_on_grid_load=True, 
+        height=min(400,32*(1+len(df))) # 32 hardcoded as the pixel size of one row, +1 for header
+        # ,gridOptions=gridOptions
+        )
 
-    cat5 = DM[(DM['Y']==select_year) & (DM['Category']==5)]
-    cat5_total = cat5['Credit Amount'].sum()
-    st.markdown(f'### Tier 5 Table (<£400): Total = {cat5_total}')
-    st.dataframe(cat5)
-
-    st.subheader('# Stacked Column Chart')
+    st.subheader('Stacked Column Chart')
 
     # Stacked Column Chart by year
 

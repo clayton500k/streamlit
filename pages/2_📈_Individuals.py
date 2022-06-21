@@ -15,7 +15,7 @@ def individuals_page():
 
     st.plotly_chart(px.bar(view_individual_data, x="Y", y="Credit Amount", color="Source Type", height=400))
 
-    AgGrid(view_individual_data)
+    AgGrid(view_individual_data,fit_columns_on_grid_load=True,height=min(400,32*(1+len(view_individual_data))) 
 
 st.set_page_config(page_title="Individuals", page_icon="📈")
 
