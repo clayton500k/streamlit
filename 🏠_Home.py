@@ -129,18 +129,15 @@ def run():
         #%% Overall Data
         if 'data' not in st.session_state:
             gsheet_connector = connect_to_gsheet()
-            st.session_state['data'] = get_data(gsheet_connector)
+            st.session_state["data"] = get_data(gsheet_connector)
 
         #%% Individual Data
         if 'DM' not in st.session_state:
-            data = st.session_state['data']
-            st.session_state['DM'] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+            data = st.session_state["data"]
+            st.session_state["DM"] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
         
 # if __name__ == "__main__":
 #     run()
 
-if 'password_check' in st.session_state:
-    run()
-else:
-    st.subheader('Error: Reload enter Password')
+run()
 
