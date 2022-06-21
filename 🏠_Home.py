@@ -12,6 +12,7 @@ from googleapiclient.http import HttpRequest
 from re import sub
 from decimal import Decimal
 from st_aggrid import AgGrid
+from PIL import Image
 
 #settings
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
@@ -118,10 +119,27 @@ def run():
 
         st.sidebar.success("Select a page above")
 
-        st.title('500k Analytics')
-        st.write(f"This app shows how a Streamlit app can interact easily with a [Google Sheet]({GSHEET_URL}) to read or store data.")
+        st.title('500k Donation Analytics')
+        
+        st.markdown(f"This Streamlit app interacts with the 500k Finances Core [Google Sheet]({GSHEET_URL}) to produce useful analytics.")
 
-        st.markdown("More fun text goes here")
+        st.markdown("Select **Overall** for a view of the overall financial picture.")
+
+        st.markdown("Select **Individuals** to analyze donations from specific individuals.")
+
+        st.markdown("Select **Tier Report** to group donors by size category and attribute overall giving to each category.")
+
+        st.markdown("Select **Donor Comparison** to view each individual's change in donations each year.")
+
+        st.markdown("This App was originally designed by <a href='mailto:claytongillespie116@gmail.com'>Clayton Gillespie</a> and is maintained by the 500k Tech Team.", unsafe_allow_html=True)
+        
+        st.markdown("Click **View App Source** in the top right menu to visit the GitHub containing this app's source code")
+
+        st.markdown("_Soli Deo Gloria_")
+
+        image = Image.open('India_map.jpg')
+
+        st.image(image)
 
         if 'password_check' not in st.session_state:
             st.session_state.password_check = 'correct'
@@ -140,4 +158,3 @@ def run():
 #     run()
 
 run()
-

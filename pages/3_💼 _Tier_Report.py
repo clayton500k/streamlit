@@ -60,11 +60,7 @@ st.title('Tier Report')
 
 if 'password_check' in st.session_state:
     tier_page()
-    st.markdown("#### Tier 5: £50k+")
-    st.markdown("#### Tier 4: £20k+")
-    st.markdown("#### Tier 3: £2k+")
-    st.markdown("#### Tier 2: £400+") 
-    st.markdown("#### Tier 1: <£400")
+    st.markdown("#### Tier 1: £50k+, Tier 2: £20k+, Tier 3: £2k+, Tier 4: £400+, Tier 5: <£400")
 else:
     st.subheader('Error: Go to Home to enter Password')
 
