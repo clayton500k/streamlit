@@ -22,9 +22,12 @@ def categorize_donor(x):
 def tier_page():
 
     DM = st.session_state.DM
+
+    #Sum over Source Type
+    DM = DM.drop(columns=['Debit Amount','Source Type'])
+    DM = DM.groupby(['Renamer','Y']).sum().reset_index()
     DM = DM.sort_values(by=['Credit Amount'], ascending=False)
     DM['Category'] = DM['Credit Amount'].apply(categorize_donor)
-    DM = DM.drop(columns=['Debit Amount'])
     DM = DM[DM['Credit Amount']!=0] #eliminate zeros to reduce table length
 
     # User Input Year
@@ -50,7 +53,7 @@ def tier_page():
     
         st.markdown(f'### Tier {tier} Table: Total = £{df_total:,.2f}')
 
-        AgGrid(df,fit_columns_on_grid_load=True,height=min(400,32*(1+len(df))))
+        AgGrid(df.drop(columns=['Category']),fit_columns_on_grid_load=True,height=min(400,32*(1+len(df))))
         # 32 hardcoded as the pixel size of one row, +1 for header
     
         
@@ -60,7 +63,7 @@ st.title('Tier Report')
 
 if 'password_check' in st.session_state:
     tier_page()
-    st.markdown("#### Tier 1: £50k+, Tier 2: £20k+, Tier 3: £2k+, Tier 4: £400+, Tier 5: <£400")
+    st.markdown("#### Tier 1: £50k+ | Tier 2: £20k+ | Tier 3: £2k+ | Tier 4: £400+ | Tier 5: <£400")
 else:
     st.subheader('Error: Go to Home to enter Password')
 

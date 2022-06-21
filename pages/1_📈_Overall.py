@@ -26,11 +26,7 @@ def overall_page():
 
     st.plotly_chart(fig, use_container_width=True)
 
-st.set_page_config(page_title="Overall", page_icon="📈")
-
 st.title('Overall')
-
-st.sidebar.header("Overall")
 
 if 'password_check' in st.session_state:
     overall_page()
