@@ -69,7 +69,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
     df['Credit Amount'] = dfCA
     df['Y'] = pd.to_numeric(df['Y'])
-    df['Y'] = df['Y'].astype(int)
+    df['Y'] = df['Y'].astype(pd.Int32Dtype())
 
     return df
 
@@ -129,12 +129,12 @@ def run():
         #%% Overall Data
         if 'data' not in st.session_state:
             gsheet_connector = connect_to_gsheet()
-            st.session_state.data = get_data(gsheet_connector)
+            st.session_state['data'] = get_data(gsheet_connector)
 
         #%% Individual Data
         if 'DM' not in st.session_state:
-            data = st.session_state.data
-            st.session_state.DM = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+            data = st.session_state['data']
+            st.session_state['DM'] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
         
 # if __name__ == "__main__":
 #     run()
