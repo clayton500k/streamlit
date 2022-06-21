@@ -1,3 +1,4 @@
+#%% Load
 import google_auth_httplib2
 import httplib2
 import numpy as np
@@ -17,6 +18,9 @@ SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 SPREADSHEET_ID = "1uAa3CbD5uYpdEQs3RXenCb5trLqnZGbOtqfaxUhcp0E"
 SHEET_NAME = "Bank"
 GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
+
+#Googlesheets data obtained using the methodology below:
+#https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
 
 def connect_to_gsheet():
     # Create a connection object.
@@ -45,6 +49,7 @@ def connect_to_gsheet():
     return gsheet_connector
 
 def get_data(gsheet_connector) -> pd.DataFrame:
+
     values = (
         gsheet_connector.values()
         .get(
@@ -64,6 +69,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
     df['Credit Amount'] = dfCA
     df['Y'] = pd.to_numeric(df['Y'])
+    df['Y'] = df['Y'].astype(int)
 
     return df
 
@@ -130,5 +136,11 @@ def run():
             data = st.session_state.data
             st.session_state.DM = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
         
-if __name__ == "__main__":
+# if __name__ == "__main__":
+#     run()
+
+if 'password_check' in st.session_state:
     run()
+else:
+    st.subheader('Error: Reload enter Password')
+
