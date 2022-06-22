@@ -34,23 +34,22 @@ def tier_page():
     year_list = ['All',2018,2019,2020,2021,2022]
     select_year = st.selectbox('Select Year',year_list,year_list.index('All'))
 
-    # horizontal radio buttons
+    # horizontal radio buttons: https://discuss.streamlit.io/t/horizontal-radio-buttons/2114
     st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
 
     if select_year=='All':
-        st.subheader('Stacked Column Chart')
         df2 = DM.groupby(['Y','Category']).sum().reset_index()
         df2 = df2.sort_values(by=['Category'])
         df2['Category'] = df2['Category'].astype(str)
         fig = px.bar(df2, x="Y", y="Credit Amount", color="Category")
-        fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15))
+        fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
+        fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
         st.plotly_chart(fig,use_container_width=True)
     else:
         tier = st.radio("Select Tier",[1,2,3,4,5])
         df = DM[(DM['Y']==select_year) & (DM['Category']==tier)]
         df_total = pd.to_numeric(df['Credit Amount'].sum())
-        df['Credit Amount'] = df['Credit Amount'].apply(lambda x: "£{:,.2f}".format(float(x)))
-    
+        
         st.markdown(f'### Tier {tier} Table: Total = £{df_total:,.2f}')
 
         AgGrid(df.drop(columns=['Category']),fit_columns_on_grid_load=True,height=min(400,32*(1+len(df))))

@@ -14,14 +14,14 @@ from decimal import Decimal
 from st_aggrid import AgGrid
 from PIL import Image
 
+#Googlesheets data obtained using the methodology below:
+#https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
+
 #settings
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 SPREADSHEET_ID = "1uAa3CbD5uYpdEQs3RXenCb5trLqnZGbOtqfaxUhcp0E"
 SHEET_NAME = "Bank"
 GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
-
-#Googlesheets data obtained using the methodology below:
-#https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
 
 def connect_to_gsheet():
     # Create a connection object.
@@ -80,10 +80,8 @@ def StringToDec(x):
     else:
         return float(Decimal(x))
 
-if 'password_check' not in st.session_state:
-    st.session_state.password_check = 0
-
 #password check
+#using Option 1 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
 def run():
     def check_password():
         """Returns `True` if the user had the correct password."""
@@ -120,8 +118,8 @@ def run():
         st.sidebar.success("Select a page above")
 
         st.title('500k Donation Analytics')
-        
-        st.markdown(f"This Streamlit app interacts with the 500k Finances Core [Google Sheet]({GSHEET_URL}) to produce useful analytics.")
+        #Markdown documentation: https://docs.streamlit.io/library/api-reference/text/st.markdown
+        st.markdown(f"This Streamlit app interacts with the [500k Finances Core Google Sheet]({GSHEET_URL}) to produce useful analytics.")
 
         st.markdown("Select **Overall** for a view of the overall financial picture.")
 
@@ -137,24 +135,23 @@ def run():
 
         st.markdown("_Soli Deo Gloria_")
 
-        image = Image.open('India_map.jpg')
-
+        #Image: https://docs.streamlit.io/library/api-reference/media/st.image
+        image = Image.open('India_map.jpg') #added to GitHub
         st.image(image)
 
+        #SS Password check used in other pages
         if 'password_check' not in st.session_state:
             st.session_state.password_check = 'correct'
 
-        #%% Overall Data
+        #%% Download all Bank Data
         if 'data' not in st.session_state:
             gsheet_connector = connect_to_gsheet()
             st.session_state["data"] = get_data(gsheet_connector)
 
-        #%% Individual Data
+        #%% Aggregate Individual Data
         if 'DM' not in st.session_state:
             data = st.session_state["data"]
             st.session_state["DM"] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
         
-# if __name__ == "__main__":
-#     run()
 
 run()

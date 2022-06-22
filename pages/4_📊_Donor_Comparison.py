@@ -26,11 +26,12 @@ def dc_page():
     # Sum over all Source Types
     df = selected_data.groupby(['Renamer','Y']).sum().reset_index()
 
+    #From long to wide format: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.pivot.html
     output = df.pivot(index='Renamer',columns='Y',values='Credit Amount').reset_index().fillna(0)
 
     output['Delta'] = output[select_year] - output[(select_year-1)]
 
-    #Sort by absolute values
+    #Sort by absolute values: https://stackoverflow.com/questions/30486263/sorting-by-absolute-value-without-changing-the-data
     output = output.reindex(output['Delta'].abs().sort_values(ascending=False).index)
 
     if view=='Lollipop':
@@ -39,14 +40,15 @@ def dc_page():
 
         st.subheader("Change from previous year's giving:")
         
-        x = st.slider('', min_value=-60000, max_value=60000,value=[1000,60000])
+        #st.slider docs: https://docs.streamlit.io/library/api-reference/widgets/st.slider
+        x = st.slider('', min_value=-60000, max_value=60000,value=[1000,60000],step=500)
 
         filtered_output = output[(output['Delta']>=x[0]) & (output['Delta']<=x[1])]
 
         filtered_output = filtered_output.reindex(filtered_output['Delta'].abs().sort_values().index)
 
-        syd = filtered_output[select_year].tolist() #Select year data
-        sydm1 = filtered_output[(select_year-1)].tolist() #Select year data minus 1 
+        syd = filtered_output[select_year].tolist() #Selected year data
+        sydm1 = filtered_output[(select_year-1)].tolist() #Selected year data minus 1 
 
         fig3= go.Figure()
         fig3.add_trace(go.Scatter(x = syd, 
@@ -83,13 +85,13 @@ def dc_page():
             st.table(output[(output[select_year]>0) & (output[(select_year-1)]==0)].style.set_precision(2))
         elif type=='Increased':
             st.subheader(f'Increased donors in {select_year}')
-            st.table(output[output['Delta']>0].style.set_precision(2))
+            st.table(output[(output['Delta']>0) & (output[(select_year-1)]!=0)].style.set_precision(2))
         elif type=='Lost':
             st.subheader(f'Lost donors in {select_year}')
             st.table(output[(output[select_year]==0) & (output[(select_year-1)]>0)].style.set_precision(2))
         else:
             st.subheader(f'Decreased donors in {select_year}')
-            st.table(output[output['Delta']<0].style.set_precision(2))
+            st.table(output[(output['Delta']<0) & (output[(select_year-1)]!=0)].style.set_precision(2))
         
 st.title('Donor Comparison')
 
