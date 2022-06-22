@@ -4,21 +4,19 @@ import streamlit as st
 import plotly.express as px
 from st_aggrid import AgGrid
 
-# Donation Matrix by Individual
 def overall_page():
 
-    #Donation Matrix Overall 
-    #@st.cache
+    #Calculate Overall Income and Expenditure by Year 
     def overall_data():
         data = st.session_state.data
         DMY = data.groupby(['Y']).sum().reset_index()
-        DMY = pd.melt(DMY,id_vars = ['Y'],var_name='Group')
+        DMY = pd.melt(DMY, id_vars = ['Y'], var_name='Group')
 
-        fig = px.bar(DMY, x="Y", y="value",
-                    color='Group', barmode='group',
-                    height=400)
+        #Plotly bar chart: https://plotly.com/python/bar-charts/
+        fig = px.bar(DMY, x="Y", y="value", color='Group', barmode='group', height=400)
         
-        fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15))
+        #legend positioning: https://plotly.com/python/legend/
+        fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
         
         return fig
     
