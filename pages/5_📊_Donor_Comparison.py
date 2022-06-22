@@ -6,11 +6,28 @@ import plotly.graph_objects as go
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
+def AgGrid_default(DF):
+        gb = GridOptionsBuilder.from_dataframe(DF)
+        gb.configure_grid_options(enableRangeSelection=True)
+        
+        for col in DF.columns:
+                if (col!='Renamer') & (col!='Y'):
+                    gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="£", aggFunc='max')
+                    
+        out = AgGrid(DF,
+        gridOptions=gb.build(),
+        fill_columns_on_grid_load=True,
+        height=min(400,32*(len(DF)+1)),
+        allow_unsafe_jscode=True,
+        enable_enterprise_modules=True
+        )
+
+        return out
+
 def dc_page():
 
-    # Horizontal Radio for user to choose view
-    st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
-    view = st.radio('Choose View:',['Lollipop','Tables'])
+    # Radio for user to choose view
+    view = st.radio('Choose View:',['Lollipop','Tables'], horizontal=True)
 
     # User Input Year
     year_list = [2017,2018,2019,2020,2021,2022]
@@ -84,31 +101,53 @@ def dc_page():
         
         st.plotly_chart(fig3,use_containter_width=True)
         
-        st.table(filtered_output.sort_values(by=['Delta'],ascending=False).style.set_precision(2))
+        filtered_output = filtered_output.sort_values(by=['Delta'],ascending=False)
 
+        # Convert Column names to string for AgGrid
+        filtered_output.columns = filtered_output.columns.astype(str)
+
+        gb = GridOptionsBuilder.from_dataframe(filtered_output)
+        gb.configure_grid_options(enableRangeSelection=True)
+        
+        AgGrid(filtered_output,
+        gridOptions=gb.build(),
+        fill_columns_on_grid_load=True,
+        height=min(400,32*(len(filtered_output)+1)),
+        allow_unsafe_jscode=True,
+        enable_enterprise_modules=True
+        )
+        
     else:
 
-        type = st.radio("View List of",['New','Increased','Lost','Decreased'])
+        type = st.radio("View List of",['New','Increased','Lost','Decreased'], horizontal=True)
 
         if type=='New':
         
             st.subheader(f'New donors in {select_year}')
-            st.table(output[(output[select_year]>0) & (output[(select_year-1)]==0)].style.set_precision(2))
+            tmp = output[(output[select_year]>0) & (output[(select_year-1)]==0)]
+            tmp.columns = tmp.columns.astype(str)
+            AgGrid_default(tmp)
         
         elif type=='Increased':
         
             st.subheader(f'Increased donors in {select_year}')
-            st.table(output[(output['Delta']>0) & (output[(select_year-1)]!=0)].style.set_precision(2))
+            tmp = output[(output['Delta']>0) & (output[(select_year-1)]!=0)]
+            tmp.columns = tmp.columns.astype(str)
+            AgGrid_default(tmp)
         
         elif type=='Lost':
         
             st.subheader(f'Lost donors in {select_year}')
-            st.table(output[(output[select_year]==0) & (output[(select_year-1)]>0)].style.set_precision(2))
+            tmp = output[(output[select_year]==0) & (output[(select_year-1)]>0)]
+            tmp.columns = tmp.columns.astype(str)
+            AgGrid_default(tmp)
         
         else:
         
             st.subheader(f'Decreased donors in {select_year}')
-            st.table(output[(output['Delta']<0) & (output[(select_year-1)]!=0)].style.set_precision(2))
+            tmp = output[(output['Delta']<0) & (output[(select_year-1)]!=0)]
+            tmp.columns = tmp.columns.astype(str)
+            AgGrid_default(tmp)
         
 st.title('Donor Comparison')
 

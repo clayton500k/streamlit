@@ -64,7 +64,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df.columns = df.iloc[0]
     df = df[1:]
     
-    #error handle formats (currency -> float)
+    #error handle formats
     dfDA = df['Debit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
     df['Debit Amount'] = dfDA
     dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
@@ -79,6 +79,27 @@ def StringToDec(x):
         return np.nan
     else:
         return float(Decimal(x))
+
+# Streamlit AgGrid: https://streamlit-aggrid.readthedocs.io/en/docs/
+# https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
+
+def AgGrid_default(DF):
+        gb = GridOptionsBuilder.from_dataframe(DF)
+        gb.configure_grid_options(enableRangeSelection=True)
+        
+        for col in DF.columns:
+                if (col!='Renamer') & (col!='Y'):
+                    gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="£", aggFunc='max')
+                    
+        out = AgGrid(DF,
+        gridOptions=gb.build(),
+        fill_columns_on_grid_load=True,
+        height=min(400,32*(len(DF)+1)),
+        allow_unsafe_jscode=True,
+        enable_enterprise_modules=True
+        )
+
+        return out
 
 #password check
 #using Option 1 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
@@ -118,7 +139,9 @@ def run():
         st.sidebar.success("Select a page above")
 
         st.title('500k Donation Analytics')
+        
         #Markdown documentation: https://docs.streamlit.io/library/api-reference/text/st.markdown
+        
         st.markdown(f"This Streamlit app interacts with the [500k Finances Core Google Sheet]({GSHEET_URL}) to produce useful analytics.")
 
         st.markdown("Select **Overall** for a view of the overall financial picture.")
@@ -139,7 +162,9 @@ def run():
         image = Image.open('India_map.jpg') #added to GitHub
         st.image(image)
 
-        #SS Password check used in other pages
+        #Session state documentation: https://docs.streamlit.io/library/advanced-features/session-state
+        
+        #Password check used in other pages
         if 'password_check' not in st.session_state:
             st.session_state.password_check = 'correct'
 
