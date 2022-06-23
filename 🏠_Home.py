@@ -13,6 +13,7 @@ from re import sub
 from decimal import Decimal
 from st_aggrid import AgGrid
 from PIL import Image
+import time 
 
 #Googlesheets data obtained using the methodology below:
 #https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
@@ -51,6 +52,8 @@ def connect_to_gsheet():
 
 def get_data(gsheet_connector) -> pd.DataFrame:
 
+    # Split into 2 requests to avoid downloading columns between P and AA
+
     values1 = (
         gsheet_connector.values()
         .get(
@@ -83,7 +86,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df['Y'] = pd.to_numeric(df['Y'])
     df['Y'] = df['Y'].astype(pd.Int32Dtype())
 
-    # Filter data seperately
+    # Filter data
 
     exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
     exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Transfer from 500k']
@@ -152,6 +155,35 @@ def run():
 
         st.title('500k Donation Analytics')
         
+        # Session state documentation: https://docs.streamlit.io/library/advanced-features/session-state
+        
+        # Password check used in other pages
+        if 'password_check' not in st.session_state:
+            st.session_state.password_check = 'correct'
+
+        placeholder = st.empty()
+        
+        with st.spinner('Downloading Data from Google Sheet'):
+    
+            # Make success disappear after 2 seconds using st.empty()
+            # https://docs.streamlit.io/library/api-reference/layout/st.empty
+
+            # Download all Bank Data
+            if 'data' not in st.session_state:
+                gsheet_connector = connect_to_gsheet()
+                st.session_state["data"] = get_data(gsheet_connector)
+
+            # Aggregate Individual Data
+            if 'DM' not in st.session_state:
+                data = st.session_state["data"]
+                st.session_state["DM"] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+
+        placeholder.success('Done!')
+
+        time.sleep(0.7)
+
+        placeholder.empty()
+    
         #Markdown documentation: https://docs.streamlit.io/library/api-reference/text/st.markdown
         
         st.markdown(f"This Streamlit app interacts with the [500k Finances Core Google Sheet]({GSHEET_URL}) to produce useful analytics.")
@@ -170,29 +202,9 @@ def run():
 
         st.markdown("_Soli Deo Gloria_")
 
-        #Image: https://docs.streamlit.io/library/api-reference/media/st.image
+        # Image documentation: https://docs.streamlit.io/library/api-reference/media/st.image
         image = Image.open('India_map.jpg') #added to GitHub
         st.image(image)
-
-        #Session state documentation: https://docs.streamlit.io/library/advanced-features/session-state
-        
-        #Password check used in other pages
-        if 'password_check' not in st.session_state:
-            st.session_state.password_check = 'correct'
-
-        #%% Download all Bank Data
-        if 'data' not in st.session_state:
-            gsheet_connector = connect_to_gsheet()
-            st.session_state["data"] = get_data(gsheet_connector)
-
-        #%% Aggregate Individual Data
-        if 'DM' not in st.session_state:
-            data = st.session_state["data"]
-            st.session_state["DM"] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
-
-        # For checks
-        # df = st.session_state["data"]     
-        # st.write(df)
 
 run()
 
