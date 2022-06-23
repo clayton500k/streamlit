@@ -161,12 +161,13 @@ def run():
         if 'password_check' not in st.session_state:
             st.session_state.password_check = 'correct'
 
+        # Make success disappear after 2 seconds using st.empty()
+        # https://docs.streamlit.io/library/api-reference/layout/st.empty
+
         placeholder = st.empty()
-        
-        with st.spinner('Downloading Data from Google Sheet'):
-    
-            # Make success disappear after 2 seconds using st.empty()
-            # https://docs.streamlit.io/library/api-reference/layout/st.empty
+
+        # Spinner while downloading: https://docs.streamlit.io/library/api-reference/status/st.spinner        
+        with st.spinner('Downloading Data from Google Sheet'):  
 
             # Download all Bank Data
             if 'data' not in st.session_state:

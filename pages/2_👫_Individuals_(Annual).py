@@ -47,6 +47,8 @@ def individuals_page():
 
     AgGrid_default(view_individual_data) 
 
+st.set_page_config(page_title="Individuals (Annual)", page_icon="👫",layout='centered')
+
 st.title('By Individual')
 
 if 'password_check' in st.session_state:

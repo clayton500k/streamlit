@@ -140,6 +140,8 @@ def dc_page():
             tmp.columns = tmp.columns.astype(str)
             AgGrid_default(tmp)
         
+st.set_page_config(layout='centered')
+
 st.title('Donor Comparison')
 
 if 'password_check' in st.session_state:
