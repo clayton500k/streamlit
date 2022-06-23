@@ -51,7 +51,7 @@ def connect_to_gsheet():
 
 def get_data(gsheet_connector) -> pd.DataFrame:
 
-    values = (
+    values1 = (
         gsheet_connector.values()
         .get(
             spreadsheetId=SPREADSHEET_ID,
@@ -60,17 +60,50 @@ def get_data(gsheet_connector) -> pd.DataFrame:
         .execute()
     )
 
-    df = pd.DataFrame(values["values"])
+    values2 = (
+        gsheet_connector.values()
+        .get(
+            spreadsheetId=SPREADSHEET_ID,
+            range=f"{SHEET_NAME}!AA:AE",
+        )
+        .execute()
+    )
+
+    df1 = pd.DataFrame(values1["values"])
+    df2 = pd.DataFrame(values2["values"])
+    df = pd.concat([df1,df2],axis=1)
     df.columns = df.iloc[0]
     df = df[1:]
     
-    #error handle formats
+    # Error handle formats
     dfDA = df['Debit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
     df['Debit Amount'] = dfDA
     dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
     df['Credit Amount'] = dfCA
     df['Y'] = pd.to_numeric(df['Y'])
     df['Y'] = df['Y'].astype(pd.Int32Dtype())
+
+    # Filter data seperately
+
+    exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
+    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Transfer from 500k']
+
+    df = df[df['Regular/Accrual']!="N/A"]
+    df = df[(df['Renamer'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False)]
+   
+    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & ([x == None for x in df['Grant Partner']])]
+    df_SA = df[(df['Source Type']=="Savings Account") & (df['Audit Income'].isin(exclude_transfers)==False)]
+    df_NCM = df[(df['Source Type']=="NCM") & (df['Audit Income'].isin(exclude_transfers[0:1])==False)]
+    df_CA = df[df['Source Type']=="CHURCHAPP"]
+    df_B = df[df['Source Type']=="BEACON"]
+    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Renamer'] != "Paypal (Arizona)")]
+    df_PA = df[(df['Source Type']=="Paypal (Arizona)") & ([x == None for x in df['Renamer']])]
+
+    # Bind
+    df = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA])
+    
+    # Return only first 16 columns
+    df = df.iloc[:,:16]
 
     return df
 
@@ -79,27 +112,6 @@ def StringToDec(x):
         return np.nan
     else:
         return float(Decimal(x))
-
-# Streamlit AgGrid: https://streamlit-aggrid.readthedocs.io/en/docs/
-# https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
-
-def AgGrid_default(DF):
-        gb = GridOptionsBuilder.from_dataframe(DF)
-        gb.configure_grid_options(enableRangeSelection=True)
-        
-        for col in DF.columns:
-                if (col!='Renamer') & (col!='Y'):
-                    gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="£", aggFunc='max')
-                    
-        out = AgGrid(DF,
-        gridOptions=gb.build(),
-        fill_columns_on_grid_load=True,
-        height=min(400,32*(len(DF)+1)),
-        allow_unsafe_jscode=True,
-        enable_enterprise_modules=True
-        )
-
-        return out
 
 #password check
 #using Option 1 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
@@ -177,6 +189,12 @@ def run():
         if 'DM' not in st.session_state:
             data = st.session_state["data"]
             st.session_state["DM"] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
-        
+
+        # For checks
+        # df = st.session_state["data"]     
+        # st.write(df)
 
 run()
+
+
+

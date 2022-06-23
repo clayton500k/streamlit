@@ -5,6 +5,9 @@ import plotly.express as px
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
+# Streamlit AgGrid: https://streamlit-aggrid.readthedocs.io/en/docs/
+# https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
+# Below built using: https://share.streamlit.io/pablocfonseca/streamlit-aggrid/main/examples/example.py
 def AgGrid_default(DF):
         gb = GridOptionsBuilder.from_dataframe(DF)
         gb.configure_grid_options(enableRangeSelection=True)

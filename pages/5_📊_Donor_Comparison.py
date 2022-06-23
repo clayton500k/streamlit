@@ -106,16 +106,7 @@ def dc_page():
         # Convert Column names to string for AgGrid
         filtered_output.columns = filtered_output.columns.astype(str)
 
-        gb = GridOptionsBuilder.from_dataframe(filtered_output)
-        gb.configure_grid_options(enableRangeSelection=True)
-        
-        AgGrid(filtered_output,
-        gridOptions=gb.build(),
-        fill_columns_on_grid_load=True,
-        height=min(400,32*(len(filtered_output)+1)),
-        allow_unsafe_jscode=True,
-        enable_enterprise_modules=True
-        )
+        AgGrid_default(filtered_output)
         
     else:
 
