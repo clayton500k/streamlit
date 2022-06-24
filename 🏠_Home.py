@@ -107,6 +107,14 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     # Bind
     df = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA])
     
+    # Paul Searle Override
+    def override(x):
+        if x=='Paul Searle (AquaAid)':
+            x = 'Paul Searle'	
+        return x
+
+    df['Renamer'] = df['Renamer'].apply(lambda x: override(x))
+
     # Return only first 16 columns
     df = df.iloc[:,:16]
 

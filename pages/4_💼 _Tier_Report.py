@@ -67,6 +67,21 @@ def tier_page():
         fig = px.bar(df2, x="Y", y="Credit Amount", color="Category")
         fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
         fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
+        
+        percent = st.radio('Show by Absolute or Percent:',['Absolute','Percent'],horizontal=True)
+
+        if percent=='Percent':
+
+            totals = df2.groupby(['Y']).sum().reset_index()
+            totals.columns = ['Y','Total']
+            df3 = df2.merge(totals,on='Y')
+            df3['Percent'] = 100 * df3['Credit Amount']/df3['Total']
+
+            fig = px.bar(df3, x="Y", y="Percent", color="Category",text_auto='.1f')
+            fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
+            fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
+            fig = fig.update_layout(barmode='relative')
+        
         st.plotly_chart(fig,use_container_width=True)
     
     else:
