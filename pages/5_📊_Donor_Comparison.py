@@ -140,7 +140,7 @@ def dc_page():
             tmp.columns = tmp.columns.astype(str)
             AgGrid_default(tmp)
         
-st.set_page_config(layout='centered')
+st.set_page_config(page_title="Donor Comparison", page_icon="📊",layout='centered')
 
 st.title('Donor Comparison')
 

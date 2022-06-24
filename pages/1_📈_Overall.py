@@ -3,6 +3,8 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 from st_aggrid import AgGrid
+from st_aggrid.grid_options_builder import GridOptionsBuilder
+
 
 def overall_page():
 
@@ -25,6 +27,8 @@ def overall_page():
     fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
     
     st.plotly_chart(fig, use_container_width=True)
+
+st.set_page_config(page_title="Overall", page_icon="📈",layout='centered')
 
 st.title('Overall')
 

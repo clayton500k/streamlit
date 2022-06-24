@@ -84,7 +84,7 @@ def tier_page():
         #Add Copy to Clipboard table
         AgGrid_default(df)
         
-st.set_page_config(page_title="Tier Report", page_icon="💼")
+st.set_page_config(page_title="Tier Report", page_icon="💼",layout='centered')
 
 st.title('Tier Report')
 

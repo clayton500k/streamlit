@@ -12,8 +12,10 @@ from googleapiclient.http import HttpRequest
 from re import sub
 from decimal import Decimal
 from st_aggrid import AgGrid
+from st_aggrid.grid_options_builder import GridOptionsBuilder
 from PIL import Image
 import time 
+from anonymizedf.anonymizedf import anonymize
 
 #Googlesheets data obtained using the methodology below:
 #https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
@@ -89,7 +91,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     # Filter data
 
     exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
-    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Transfer from 500k']
+    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Transfer from 500k','500k Indiana']
 
     df = df[df['Regular/Accrual']!="N/A"]
     df = df[(df['Renamer'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False)]
@@ -117,31 +119,35 @@ def StringToDec(x):
         return float(Decimal(x))
 
 #password check
-#using Option 1 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
+#using Option 2 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
 def run():
     def check_password():
         """Returns `True` if the user had the correct password."""
 
         def password_entered():
             """Checks whether a password entered by the user is correct."""
-            if st.session_state["password"] == st.secrets["password"]:
+            if (
+            st.session_state["username"] in st.secrets["passwords"]
+            and st.session_state["password"]
+            == st.secrets["passwords"][st.session_state["username"]]
+            ):
                 st.session_state["password_correct"] = True
-                del st.session_state["password"]  # don't store password
+                del st.session_state["password"]  # don't store username + password
+                #del st.session_state["username"] # store username for anon check
+
             else:
                 st.session_state["password_correct"] = False
 
         if "password_correct" not in st.session_state:
-            # First run, show input for password.
-            st.text_input(
-                "Password", type="password", on_change=password_entered, key="password"
-            )
+            # First run, show inputs for username + password.
+            st.text_input("Username", key="username") #on_change=password_entered,
+            st.text_input("Password", type="password", on_change=password_entered, key="password")
             return False
         elif not st.session_state["password_correct"]:
             # Password not correct, show input + error.
-            st.text_input(
-                "Password", type="password", on_change=password_entered, key="password"
-            )
-            st.error("😕 Password incorrect")
+            st.text_input("Username", key="username") #on_change=password_entered,
+            st.text_input("Password", type="password", on_change=password_entered, key="password")
+            st.error("😕 User not known or password incorrect")
             return False
         else:
             # Password correct.
@@ -149,12 +155,10 @@ def run():
 
     if check_password():
 
-        st.set_page_config(page_title="Home", page_icon="👋")
-
         st.sidebar.success("Select a page above")
 
         st.title('500k Donation Analytics')
-        
+
         # Session state documentation: https://docs.streamlit.io/library/advanced-features/session-state
         
         # Password check used in other pages
@@ -172,7 +176,19 @@ def run():
             # Download all Bank Data
             if 'data' not in st.session_state:
                 gsheet_connector = connect_to_gsheet()
-                st.session_state["data"] = get_data(gsheet_connector)
+                tmp = get_data(gsheet_connector)
+
+                # If guest account, anonymize names:
+                # https://towardsdatascience.com/how-to-quickly-anonymize-personal-names-in-python-6e78115a125b
+                # https://pypi.org/project/anonymizedf/
+                
+                if st.session_state["username"]=="admin":
+                    st.session_state["data"] = tmp
+                else:    
+                    an = anonymize(tmp)
+                    an.fake_names("Renamer")
+                    tmp['Renamer'] = tmp['Fake_Renamer']
+                    st.session_state["data"] = tmp
 
             # Aggregate Individual Data
             if 'DM' not in st.session_state:
@@ -206,6 +222,8 @@ def run():
         # Image documentation: https://docs.streamlit.io/library/api-reference/media/st.image
         image = Image.open('India_map.jpg') #added to GitHub
         st.image(image)
+
+st.set_page_config(layout='centered')
 
 run()
 
