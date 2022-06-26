@@ -49,6 +49,9 @@ def dc_page():
     # Calculate change
     output['Delta'] = output[select_year] - output[(select_year-1)]
 
+    # Fitler out Delta == 0
+    output = output[(output['Delta']!=0) & (output[(select_year-1)]!=0)]
+
     #Sort by absolute values: https://stackoverflow.com/questions/30486263/sorting-by-absolute-value-without-changing-the-data
     output = output.reindex(output['Delta'].abs().sort_values(ascending=False).index)
 
