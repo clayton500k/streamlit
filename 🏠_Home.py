@@ -109,11 +109,11 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     
     # Paul Searle Override
     def override(x):
-        if x=='Paul Searle (AquaAid)':
+        if (x=='Paul Searle (AquaAid)') | (x=='Kirsten Searle') :
             x = 'Paul Searle'	
         return x
 
-    df['Renamer'] = df['Renamer'].apply(lambda x: override(x))
+    df['Renamer'] = df['Renamer'].apply(override)
 
     # Return only first 16 columns
     df = df.iloc[:,:16]
@@ -195,13 +195,23 @@ def run():
                 else:    
                     an = anonymize(tmp)
                     an.fake_names("Renamer")
+                    if "giftaid_fake_name" not in st.session_state:
+                        st.session_state["giftaid_fake_name"] = tmp[tmp['Renamer']=='Gift Aid (HMRC Charities)']['Fake_Renamer'].tolist()[0]
                     tmp['Renamer'] = tmp['Fake_Renamer']
                     st.session_state["data"] = tmp
 
             # Aggregate Individual Data
             if 'DM' not in st.session_state:
                 data = st.session_state["data"]
-                st.session_state["DM"] = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+                DM = data.groupby(['Renamer','Source Type','Y']).sum().reset_index()
+                st.session_state["DM"] = DM
+
+            # Remove Giftaid for Tier Report Data
+            if 'TRD' not in st.session_state:
+                if st.session_state["username"]=="admin":
+                    st.session_state["TRD"] = DM[DM['Renamer']!='Gift Aid (HMRC Charities)']
+                else:
+                    st.session_state["TRD"] = DM[DM['Renamer']!=st.session_state["giftaid_fake_name"]]
 
         placeholder.success('Done!')
 

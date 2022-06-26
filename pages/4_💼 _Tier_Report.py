@@ -39,7 +39,7 @@ def AgGrid_default(DF):
 
 def tier_page():
 
-    DM = st.session_state.DM
+    DM = st.session_state.TRD
 
     # Sum over Source Type
     DM = DM.drop(columns=['Debit Amount','Source Type'])
