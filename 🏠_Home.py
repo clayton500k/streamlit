@@ -126,6 +126,19 @@ def StringToDec(x):
     else:
         return float(Decimal(x))
 
+def get_gbpusd():
+
+    start_date = '2012-06-01'
+    end_date = pd.Timestamp.today()  
+        
+    # retrieve market data of current ticker symbol
+    gbpusd = dr.data.DataReader('GBPUSD%3DX', data_source='yahoo', start=start_date, end=end_date).reset_index()
+    gbpusd['Date'] = pd.to_datetime(gbpusd['Date'])
+
+    df = gbpusd[gbpusd['Date'].dt.day==1][['Date','Adj Close']]
+
+    return df
+
 #password check
 #using Option 2 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
 def run():
@@ -246,17 +259,4 @@ def run():
 st.set_page_config(layout='centered')
 
 run()
-
-# import pandas as pd
-# 
-    
-# # change date range here
-# start_date = '2022-06-01'
-# end_date = '2022-07-01'
-    
-# # retrieve market data of current ticker symbol
-# gbpusd = dr.data.DataReader('GBPUSD%3DX', data_source='yahoo', start=start_date, end=end_date)
-    
-# # just get latest adjusted close for further use
-# print(gbpusd['Adj Close'])
 

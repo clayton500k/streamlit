@@ -1,19 +1,12 @@
-#%% Load
-import google_auth_httplib2
-import httplib2
 import numpy as np
 import pandas as pd
 import streamlit as st
 import math
 import plotly.express as px
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import HttpRequest
 from re import sub
 from decimal import Decimal
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
-from PIL import Image
 import time 
 from datetime import datetime
 
