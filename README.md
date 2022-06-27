@@ -1,4 +1,4 @@
-Data Analytics Dashboards for 500k using Streamlit
+Data Analytics Dashboards for 500k using Streamlit (https://docs.streamlit.io/)
 
 To run locally:
 
