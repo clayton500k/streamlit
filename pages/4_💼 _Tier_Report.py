@@ -28,9 +28,11 @@ def AgGrid_default(DF):
         gb.configure_grid_options(enableRangeSelection=True)
         
         for col in DF.columns:
-                if (col!='Renamer') & (col!='Y'):
+                if (col!='Renamer') & (col!='Y') & (st.session_state["currency_choice"]=='GBP'):
                     gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="£", aggFunc='max')
-                    
+                elif (col!='Renamer') & (col!='Y') & (st.session_state["currency_choice"]=='USD'):
+                    gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="$", aggFunc='max')
+
         out = AgGrid(DF,
         gridOptions=gb.build(),
         fill_columns_on_grid_load=True,
@@ -86,9 +88,7 @@ def tier_page():
         
         elif view_choice=='Percent':
 
-            #df4 = df2.merge(df3,on=['Y','Category'])
-
-            totals = df2.groupby(['Y']).sum().reset_index()
+            totals = df2[['Y','Credit Amount']].groupby(['Y']).sum().reset_index()
             totals.columns = ['Y','Total']
             df5 = df2.merge(totals,on='Y')
             df5 = df5.merge(df3,on=['Y','Category'])

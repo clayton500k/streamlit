@@ -10,12 +10,6 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 import time 
 from datetime import datetime
 
-# leading 0 for Jan-Sept
-def leading_zero(x):
-    if pd.to_numeric(x) < 10:
-        x = '0' + str(x)
-    return x
-
 def AgGrid_default(DF):
         gb = GridOptionsBuilder.from_dataframe(DF)
         gb.configure_grid_options(enableRangeSelection=True)
@@ -23,7 +17,6 @@ def AgGrid_default(DF):
         for col in DF.columns:
                 if (col!='Renamer') & (col!='Y'):
                     col = str(col)
-                    #gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="£", aggFunc='max')
                     gb.configure_column(col,type=["numericColumn","numberColumnFilter","customNumericFormat"], precision=0)
                 else:
                     gb.configure_column(col,pinned=True)
@@ -47,11 +40,9 @@ def individuals_annual():
     # Retrive Individual summed data from session_state
     input_data = st.session_state.data
 
-    # Sum by Year - Month
+    # Sum by Year
     df = input_data.groupby(['Renamer','Y']).sum().reset_index()
     df['Year'] = df['Y'].astype(int)
-    #df['Year'] = df["Y"].astype(str) + '01' + '01'
-    #df['Year'] = df['Year'].apply(lambda x: datetime.strptime(x,"%Y%m%d").date())
 
     output = df.pivot(index='Renamer',columns='Year',values='Credit Amount').reset_index().fillna(0)
 

@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 import math
 import plotly.express as px
+import plotly.graph_objects as go
 from re import sub
 from decimal import Decimal
 from st_aggrid import AgGrid
@@ -15,9 +16,11 @@ def AgGrid_default(DF):
         gb.configure_grid_options(enableRangeSelection=True)
         
         for col in DF.columns:
-                if (col!='Renamer') & (col!='Y'):
+                if (col!='Renamer') & (col!='Y') & (st.session_state["currency_choice"]=='GBP'):
                     gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="£", aggFunc='max')
-                    
+                elif (col!='Renamer') & (col!='Y') & (st.session_state["currency_choice"]=='USD'):
+                    gb.configure_column(col, type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="$", aggFunc='max')
+
         out = AgGrid(DF,
         gridOptions=gb.build(),
         fill_columns_on_grid_load=True,

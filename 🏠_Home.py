@@ -14,6 +14,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from PIL import Image
 import time 
+from datetime import datetime
 from anonymizedf.anonymizedf import anonymize
 import pandas_datareader as dr
 
@@ -118,6 +119,29 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     # Return only first 16 columns
     df = df.iloc[:,:16]
 
+    # Add Date Column
+    df['M'] = df['M'].apply(leading_zero)
+    df['Month'] = df["Y"].astype(str) + df["M"].astype(str) + '01'
+    df['Month'] = df['Month'].apply(lambda x: datetime.strptime(x,"%Y%m%d").date())
+    df['Month'] = pd.to_datetime(df['Month'])
+
+    start_date = '2012-06-01'
+    end_date = pd.Timestamp.today()  
+        
+    # retrieve market data of current ticker symbol
+    gbpusd = dr.data.DataReader('GBPUSD%3DX', data_source='yahoo', start=start_date, end=end_date).reset_index()
+    gbpusd['Month'] = pd.to_datetime(gbpusd['Date'])
+
+    gbpusd = gbpusd[gbpusd['Month'].dt.day==1][['Month','Adj Close']]
+    
+    df = df.merge(gbpusd,on='Month')
+    
+    df['Credit Amount GBP'] =  df['Credit Amount']
+    df['Credit Amount USD'] =  df['Credit Amount GBP'] * df['Adj Close']
+
+    df['Debit Amount GBP'] =  df['Debit Amount']
+    df['Debit Amount USD'] =  df['Debit Amount GBP'] * df['Adj Close']
+
     return df
 
 def StringToDec(x):
@@ -126,18 +150,11 @@ def StringToDec(x):
     else:
         return float(Decimal(x))
 
-def get_gbpusd():
-
-    start_date = '2012-06-01'
-    end_date = pd.Timestamp.today()  
-        
-    # retrieve market data of current ticker symbol
-    gbpusd = dr.data.DataReader('GBPUSD%3DX', data_source='yahoo', start=start_date, end=end_date).reset_index()
-    gbpusd['Date'] = pd.to_datetime(gbpusd['Date'])
-
-    df = gbpusd[gbpusd['Date'].dt.day==1][['Date','Adj Close']]
-
-    return df
+# leading 0 for Jan-Sept
+def leading_zero(x):
+    if pd.to_numeric(x) < 10:
+        x = '0' + str(x)
+    return x
 
 #password check
 #using Option 2 here: https://docs.streamlit.io/knowledge-base/deploy/authentication-without-sso
@@ -178,7 +195,10 @@ def run():
 
         st.sidebar.success("Select a page above")
 
-        #st.sidebar()
+        if 'currency_choice' not in st.session_state:
+            st.session_state["currency_choice"] = st.sidebar.radio("Choose Currency:",['GBP','USD'],horizontal=True)
+        else:
+            st.session_state["currency_choice"] = st.sidebar.radio("Choose Currency:",['GBP','USD'],horizontal=True,index=['GBP','USD'].index(st.session_state["currency_choice"]))
 
         st.title('500k Donation Analytics')
 
@@ -255,6 +275,22 @@ def run():
         # Image documentation: https://docs.streamlit.io/library/api-reference/media/st.image
         image = Image.open('India_map.jpg') #added to GitHub
         st.image(image)
+
+        convert_gbpusd(st.session_state["currency_choice"])
+
+# Convert to USD/GBP
+def convert_gbpusd(curr): 
+
+    tmp = st.session_state["data"]
+
+    if curr=='USD':
+        tmp['Credit Amount'] = tmp['Credit Amount USD']
+        tmp['Debit Amount'] = tmp['Debit Amount USD']
+    elif curr=='GBP':
+        tmp['Credit Amount'] = tmp['Credit Amount GBP']
+        tmp['Debit Amount'] = tmp['Debit Amount GBP']
+
+    st.session_state["data"] = tmp
 
 st.set_page_config(layout='centered')
 

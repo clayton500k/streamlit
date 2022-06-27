@@ -17,15 +17,16 @@ def overall_page():
 
         # Retrive data from session_state
         data = st.session_state.data
-        DMY = data.groupby(['Y']).sum().reset_index()
+        DMY = data[['Y','Credit Amount','Debit Amount']]
+        DMY = DMY.groupby(['Y']).sum().reset_index()
         DMY = pd.melt(DMY, id_vars = ['Y'], var_name='Group')
 
         return DMY
 
-    DMY = overall_data()
+    df2 = overall_data()
     
     # Plotly bar chart: https://plotly.com/python/bar-charts/
-    fig = px.bar(DMY, x="Y", y="value", color='Group', barmode='group', height=400)
+    fig = px.bar(df2, x="Y", y="value", color='Group', barmode='group', height=400)
     
     # Legend positioning: https://plotly.com/python/legend/
     fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
