@@ -292,6 +292,13 @@ def convert_gbpusd(curr):
 
     st.session_state["data"] = tmp
 
+    DM = tmp[['Renamer','Source Type','Y','Credit Amount','Debit Amount']].groupby(['Renamer','Source Type','Y']).sum().reset_index()
+    st.session_state["DM"] = DM
+    try: 
+        st.session_state["TRD"] = DM[DM['Renamer']!=st.session_state["giftaid_fake_name"]]           
+    except:
+        st.session_state["TRD"] = DM[DM['Renamer']!='Gift Aid (HMRC Charities)']
+
 st.set_page_config(layout='centered')
 
 run()

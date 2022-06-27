@@ -40,7 +40,7 @@ def dc_page():
     year_list = [2017,2018,2019,2020,2021,2022]
     select_year = st.selectbox('Select Year',year_list,year_list.index(2022))
 
-    DM = st.session_state.DM
+    DM = st.session_state['TRD']
     DM['Y'] = DM['Y'].astype(int)
     DM = DM.sort_values(by=['Credit Amount'], ascending=False)
 
@@ -57,7 +57,7 @@ def dc_page():
     output['Delta'] = output[select_year] - output[(select_year-1)]
 
     # Fitler out Delta == 0
-    output = output[(output['Delta']!=0) & (output[(select_year-1)]!=0)]
+    output = output[(output['Delta']!=0)]
 
     #Sort by absolute values: https://stackoverflow.com/questions/30486263/sorting-by-absolute-value-without-changing-the-data
     output = output.reindex(output['Delta'].abs().sort_values(ascending=False).index)
@@ -146,7 +146,7 @@ def dc_page():
         else:
         
             st.subheader(f'Decreased donors in {select_year}')
-            tmp = output[(output['Delta']<0) & (output[(select_year-1)]!=0)]
+            tmp = output[(output['Delta']<0) & (output[(select_year)]!=0)]
             tmp.columns = tmp.columns.astype(str)
             AgGrid_default(tmp)
         
