@@ -15,6 +15,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from PIL import Image
 import time 
 from anonymizedf.anonymizedf import anonymize
+import pandas_datareader as dr
 
 #Googlesheets data obtained using the methodology below:
 #https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
@@ -164,6 +165,8 @@ def run():
 
         st.sidebar.success("Select a page above")
 
+        #st.sidebar()
+
         st.title('500k Donation Analytics')
 
         # Session state documentation: https://docs.streamlit.io/library/advanced-features/session-state
@@ -244,5 +247,16 @@ st.set_page_config(layout='centered')
 
 run()
 
-
+# import pandas as pd
+# 
+    
+# # change date range here
+# start_date = '2022-06-01'
+# end_date = '2022-07-01'
+    
+# # retrieve market data of current ticker symbol
+# gbpusd = dr.data.DataReader('GBPUSD%3DX', data_source='yahoo', start=start_date, end=end_date)
+    
+# # just get latest adjusted close for further use
+# print(gbpusd['Adj Close'])
 

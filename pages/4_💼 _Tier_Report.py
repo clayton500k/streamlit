@@ -68,47 +68,54 @@ def tier_page():
         df2['Category'] = df2['Category'].astype(str)
 
         # Count by Category and Year
-        df4 = DM[['Renamer','Y','Category']].groupby(['Y','Category']).count().reset_index()
-        df4.columns = ['Y','Category','Count']
-        df4 = df4.sort_values(by=['Category'])
-        df4['Category'] = df4['Category'].astype(str)
+        df3 = DM[['Renamer','Y','Category']].groupby(['Y','Category']).count().reset_index()
+        df3.columns = ['Y','Category','Count']
+        df3 = df3.sort_values(by=['Category'])
+        df3['Category'] = df3['Category'].astype(str)
        
         view_choice = st.radio('Show by Absolute or Percent:',['Absolute','Percent','Count','Count Percent'],horizontal=True)
 
         if view_choice=='Absolute':
 
-            fig = px.bar(df2, x="Y", y="Credit Amount", color="Category",text_auto='.2s')
+            df4 = df2.merge(df3,on=['Y','Category'])
+
+            fig = px.bar(df4, x="Y", y="Credit Amount", custom_data=['Count'], color="Category",text_auto='.2s')
             fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
             fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
+            fig = fig.update_traces(hovertemplate="<br>".join(["Year: %{x}", "Credit Amount: %{y}", "Count: %{customdata[0]}"]))
         
         elif view_choice=='Percent':
 
+            #df4 = df2.merge(df3,on=['Y','Category'])
+
             totals = df2.groupby(['Y']).sum().reset_index()
             totals.columns = ['Y','Total']
-            df3 = df2.merge(totals,on='Y')
-            df3['Percent'] = 100 * df3['Credit Amount']/df3['Total']
+            df5 = df2.merge(totals,on='Y')
+            df5 = df5.merge(df3,on=['Y','Category'])
+            df5['Percent'] = 100 * df5['Credit Amount']/df5['Total']
 
-            fig = px.bar(df3, x="Y", y="Percent", color="Category",text_auto='.1f')
+            fig = px.bar(df5, x="Y", y="Percent", custom_data=['Count'], color="Category",text_auto='.1f')
             fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
             fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
             fig = fig.update_layout(barmode='relative')
+            fig = fig.update_traces(hovertemplate="<br>".join(["Year: %{x}", "Percent: %{y}", "Count: %{customdata[0]}"]))
         
         elif view_choice=='Count':
 
-            fig = px.bar(df4, x="Y", y="Count", color="Category",text_auto='.0f')
+            fig = px.bar(df3, x="Y", y="Count", color="Category",text_auto='.0f')
             fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
             fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
             fig = fig.update_layout(barmode='relative')
 
         elif view_choice=='Count Percent':
 
-            count_total = df4.groupby(['Y']).sum().reset_index()
+            count_total = df3.groupby(['Y']).sum().reset_index()
             count_total.columns = ['Y','Total']
-            df5 = df4.merge(count_total,on='Y')
-            df5 = df5.sort_values(by=['Category'])
-            df5['Count Percent'] = 100 * df5['Count']/df5['Total']
+            df6 = df3.merge(count_total,on='Y')
+            df6 = df6.sort_values(by=['Category'])
+            df6['Count Percent'] = 100 * df6['Count']/df6['Total']
 
-            fig = px.bar(df5, x="Y", y="Count Percent", color="Category",text_auto='.1f')
+            fig = px.bar(df6, x="Y", y="Count Percent", color="Category",text_auto='.1f')
             fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
             fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
             fig = fig.update_layout(barmode='relative')
