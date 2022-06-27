@@ -125,6 +125,8 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df['Month'] = df['Month'].apply(lambda x: datetime.strptime(x,"%Y%m%d").date())
     df['Month'] = pd.to_datetime(df['Month'])
 
+    # Select GBP or USD values
+    # Currency rates downloaded from Yahoo Finance using: https://stackoverflow.com/a/66420251/18475595
     start_date = '2012-06-01'
     end_date = pd.Timestamp.today()  
         
@@ -292,6 +294,7 @@ def convert_gbpusd(curr):
 
     st.session_state["data"] = tmp
 
+    # Choice flows through into DM and TRD
     DM = tmp[['Renamer','Source Type','Y','Credit Amount','Debit Amount']].groupby(['Renamer','Source Type','Y']).sum().reset_index()
     st.session_state["DM"] = DM
     try: 
