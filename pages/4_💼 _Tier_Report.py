@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
+import math
 import plotly.express as px
-import plotly.graph_objects as go
+from re import sub
+from decimal import Decimal
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
+import time 
+from datetime import datetime
 
 def categorize_donor(x):
     if x >= 50000:
@@ -62,15 +66,22 @@ def tier_page():
         df2 = DM.groupby(['Y','Category']).sum().reset_index()
         df2 = df2.sort_values(by=['Category'])
         df2['Category'] = df2['Category'].astype(str)
-       
-        # Plot
-        fig = px.bar(df2, x="Y", y="Credit Amount", color="Category")
-        fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
-        fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
-        
-        percent = st.radio('Show by Absolute or Percent:',['Absolute','Percent'],horizontal=True)
 
-        if percent=='Percent':
+        # Count by Category and Year
+        df4 = DM[['Renamer','Y','Category']].groupby(['Y','Category']).count().reset_index()
+        df4.columns = ['Y','Category','Count']
+        df4 = df4.sort_values(by=['Category'])
+        df4['Category'] = df4['Category'].astype(str)
+       
+        view_choice = st.radio('Show by Absolute or Percent:',['Absolute','Percent','Count','Count Percent'],horizontal=True)
+
+        if view_choice=='Absolute':
+
+            fig = px.bar(df2, x="Y", y="Credit Amount", color="Category",text_auto='.2s')
+            fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
+            fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
+        
+        elif view_choice=='Percent':
 
             totals = df2.groupby(['Y']).sum().reset_index()
             totals.columns = ['Y','Total']
@@ -82,6 +93,26 @@ def tier_page():
             fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
             fig = fig.update_layout(barmode='relative')
         
+        elif view_choice=='Count':
+
+            fig = px.bar(df4, x="Y", y="Count", color="Category",text_auto='.0f')
+            fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
+            fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
+            fig = fig.update_layout(barmode='relative')
+
+        elif view_choice=='Count Percent':
+
+            count_total = df4.groupby(['Y']).sum().reset_index()
+            count_total.columns = ['Y','Total']
+            df5 = df4.merge(count_total,on='Y')
+            df5 = df5.sort_values(by=['Category'])
+            df5['Count Percent'] = 100 * df5['Count']/df5['Total']
+
+            fig = px.bar(df5, x="Y", y="Count Percent", color="Category",text_auto='.1f')
+            fig = fig.update_layout(legend=dict(orientation="h",y=-0.15,x=0.15),margin=dict(t=30,b=10))
+            fig = fig.update_layout(title_text ="Income by Category", title_font_size = 20)
+            fig = fig.update_layout(barmode='relative')
+
         st.plotly_chart(fig,use_container_width=True)
     
     else:

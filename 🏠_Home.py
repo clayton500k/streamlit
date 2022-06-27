@@ -1,4 +1,3 @@
-#%% Load
 import google_auth_httplib2
 import httplib2
 import numpy as np
@@ -179,7 +178,7 @@ def run():
         placeholder = st.empty()
 
         # Spinner while downloading: https://docs.streamlit.io/library/api-reference/status/st.spinner        
-        with st.spinner('Downloading Data from Google Sheet'):  
+        with st.spinner('Downloading Data from Google Sheet. Please Wait...'):  
 
             # Download all Bank Data
             if 'data' not in st.session_state:
