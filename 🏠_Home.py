@@ -89,24 +89,31 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df['Y'] = pd.to_numeric(df['Y'])
     df['Y'] = df['Y'].astype(pd.Int32Dtype())
 
-    # Filter data
+   # Filter data
 
-    exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
-    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Transfer from 500k','500k Indiana']
+    exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Interest','Transfer from 500k USA']
+    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Gift Aid (HMRC Charities)','Transfer from 500k','500k Indiana']
+
+    
+
+    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'] != "")]
+    df_PA = df[(df['Source Type']=="Paypal (Arizona)") &  (df['Renamer'] != "") & (df['Regular/Accrual']!="N/A")]
+    df_B = df[df['Source Type']=="BEACON"]
+    df_CA = df[df['Source Type']=="CHURCHAPP"]
 
     df = df[df['Regular/Accrual']!="N/A"]
-    df = df[(df['Renamer'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False)]
-   
-    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & ([x == None for x in df['Grant Partner']])]
+    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit Income'].isin(exclude_transfers[0:4])==False) & (df['Renamer'].isin(exclude_sources[0:3])==False) ]
+    
     df_SA = df[(df['Source Type']=="Savings Account") & (df['Audit Income'].isin(exclude_transfers)==False)]
     df_NCM = df[(df['Source Type']=="NCM") & (df['Audit Income'].isin(exclude_transfers[0:1])==False)]
-    df_CA = df[df['Source Type']=="CHURCHAPP"]
-    df_B = df[df['Source Type']=="BEACON"]
-    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Renamer'] != "Paypal (Arizona)")]
-    df_PA = df[(df['Source Type']=="Paypal (Arizona)") & ([x == None for x in df['Renamer']])]
+     
+   
 
+    
     # Bind
     df = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA])
+
+    #st.write(df.groupby(['Y']).sum().reset_index())
     
     # Paul Searle Override
     def override(x):
