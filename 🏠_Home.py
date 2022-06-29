@@ -283,7 +283,9 @@ def run():
 
         st.markdown("This App was originally designed by <a href='mailto:claytongillespie116@gmail.com'>Clayton Gillespie</a> and is maintained by the 500k Tech Team.", unsafe_allow_html=True)
         
-        st.markdown("Click **View App Source** in the top right menu to visit the GitHub containing this app's source code")
+        st.markdown("Click **View App Source** in the top right menu to visit the GitHub containing this app's source code.")
+
+        st.markdown(f"Data last updated {str(data[['Month']].iloc[-1,:][0])[0:10]}.")
 
         st.markdown("_Soli Deo Gloria_")
 
