@@ -10,8 +10,6 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 import time 
 from datetime import datetime
 
-# Change to illustrate git pull
-
 def overall_page():
 
     # Calculate Overall Income and Expenditure by Year 
