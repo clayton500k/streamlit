@@ -102,7 +102,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df_SA = df[(df['Source Type']=="Savings Account") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
 
     # NCM
-    df_NCM = df[(df['Source Type']=="NCM") & (df['Regular/Accrual']!='N/A') & (df['Audit Income']!='Transfers from 500k')]
+    df_NCM = df[(df['Source Type']=="NCM") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
 
     # CHURCHAPP
     df_CA = df[df['Source Type']=="CHURCHAPP"]
@@ -285,7 +285,7 @@ def run():
         
         st.markdown("Click **View App Source** in the top right menu to visit the GitHub containing this app's source code.")
 
-        st.markdown(f"Data last updated {str(data[['Month']].iloc[-1,:][0])[0:10]}.")
+        st.markdown(f"Data last updated {str(st.session_state.data[['Month']].iloc[-1,:][0])[0:10]}.")
 
         st.markdown("_Soli Deo Gloria_")
 
