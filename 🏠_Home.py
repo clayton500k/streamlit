@@ -1,3 +1,4 @@
+from pickle import FALSE
 import google_auth_httplib2
 import httplib2
 import numpy as np
@@ -91,24 +92,29 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 
    # Filter data
 
-    exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Interest','Transfer from 500k USA']
-    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Gift Aid (HMRC Charities)','Transfer from 500k','500k Indiana']
+    exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
+    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe'] # ,'Gift Aid (HMRC Charities)','Transfer from 500k','500k Indiana']
 
+    # Source Bank
+    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & (df['Grant Partner'].isnull()) & (df['Regular/Accrual']!='N/A')]
     
+    # Savings Account
+    df_SA = df[(df['Source Type']=="Savings Account") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
 
-    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'] != "")]
-    df_PA = df[(df['Source Type']=="Paypal (Arizona)") &  (df['Renamer'] != "") & (df['Regular/Accrual']!="N/A")]
-    df_B = df[df['Source Type']=="BEACON"]
+    # NCM
+    df_NCM = df[(df['Source Type']=="NCM") & (df['Regular/Accrual']!='N/A') & (df['Audit Income']!='Transfers from 500k')]
+
+    # CHURCHAPP
     df_CA = df[df['Source Type']=="CHURCHAPP"]
 
-    df = df[df['Regular/Accrual']!="N/A"]
-    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit Income'].isin(exclude_transfers[0:4])==False) & (df['Renamer'].isin(exclude_sources[0:3])==False) ]
-    
-    df_SA = df[(df['Source Type']=="Savings Account") & (df['Audit Income'].isin(exclude_transfers)==False)]
-    df_NCM = df[(df['Source Type']=="NCM") & (df['Audit Income'].isin(exclude_transfers[0:1])==False)]
-     
-   
+    # BEACON
+    df_B = df[df['Source Type']=="BEACON"]
 
+    # Bank Arizona
+    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!='N/A')]
+    
+    # Paypal Arizona
+    df_PA = df[(df['Source Type']=="Paypal (Arizona)") &  (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!="N/A")]
     
     # Bind
     df = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA])
