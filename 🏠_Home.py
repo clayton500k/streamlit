@@ -83,6 +83,10 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df = df[1:]
     
     # Error handle formats
+    
+    # Remove null Months
+    df = df[df['Y'].isnull()==False]
+    
     dfDA = df['Debit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
     df['Debit Amount'] = dfDA
     dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
@@ -135,7 +139,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     # Add Date Column
     df['M'] = df['M'].apply(leading_zero)
     df['Month'] = df["Y"].astype(str) + df["M"].astype(str) + '01'
-    df['Month'] = df['Month'].apply(lambda x: datetime.strptime(x,"%Y%m%d").date())
+    df['Month'] = df['Month'].apply(StringtoDate)
     df['Month'] = pd.to_datetime(df['Month'])
 
     # Select GBP or USD values
@@ -164,6 +168,13 @@ def StringToDec(x):
         return np.nan
     else:
         return float(Decimal(x))
+
+def StringtoDate(x):
+    try:
+        datetime.strptime(x,"%Y%m%d").date()
+    except:
+        x
+    return x
 
 # leading 0 for Jan-Sept
 def leading_zero(x):
