@@ -80,7 +80,7 @@ def individuals_annual():
 
         plot_df = df[(df['Year']>=date_range[0]) & (df['Year']<=date_range[1])].pivot(index='Year',columns='Renamer',values='Credit Amount').fillna(0)
 
-        fig = px.bar(plot_df[Donors], facet_row="Renamer", facet_row_spacing=0.02,height=550)
+        fig = px.bar(plot_df[Donors], facet_row="Renamer", facet_row_spacing=0.02, text_auto='.2s', height=550)
 
         # hide and lock down axes and remove facet/subplot labels
         fig.update_xaxes(autorange="reversed")
