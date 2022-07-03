@@ -94,18 +94,20 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df['Y'] = pd.to_numeric(df['Y'])
     df['Y'] = df['Y'].astype(pd.Int32Dtype())
 
-   # Filter data
+    # Filter data
+
+    # Convert to lowercase to remove case-sensitivity
+    # Ignore warning: https://www.dataquest.io/blog/settingwithcopywarning/
+    df['Renamer'] = df['Renamer'].str.lower()
+    df['Audit Income'] = df['Audit Income'].str.lower()
+    df['Audit expense'] = df['Audit expense'].str.lower() 
+    df['Source Type'] = df['Source Type'].str.lower() 
 
    # Store downloaded data for use in expenses filter
     working_data = df
 
     # Isolate income data for income filter
     df = df[df['Credit Amount'].isnull()==False]
-
-    # Convert to lowercase to remove case-sensitivity
-    # Ignore warning: https://www.dataquest.io/blog/settingwithcopywarning/
-    df['Renamer'] = df['Renamer'].str.lower()
-    df['Renamer'] = df['Audit Income'].str.lower() 
 
     exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
     exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe'] # ,'Gift Aid (HMRC Charities)','Transfer from 500k','500k Indiana']
@@ -115,31 +117,31 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     exclude_sources = list(map(lambda x : x.lower(),exclude_sources))
 
     # Bank
-    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & (df['Grant Partner'].isnull()) & (df['Regular/Accrual']!='N/A')]
+    df_Bank = df[(df['Source Type']=="bank") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & (df['Grant Partner'].isnull()) & (df['Regular/Accrual']!='N/A')]
     
     # Savings Account
-    df_SA = df[(df['Source Type']=="Savings Account") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
+    df_SA = df[(df['Source Type']=="savings account") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
 
     # NCM
-    df_NCM = df[(df['Source Type']=="NCM") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
+    df_NCM = df[(df['Source Type']=="ncm") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
 
     # CHURCHAPP
-    df_CA = df[df['Source Type']=="CHURCHAPP"]
+    df_CA = df[df['Source Type']=="churchapp"]
 
     # BEACON
-    df_B = df[df['Source Type']=="BEACON"]
+    df_B = df[df['Source Type']=="beacon"]
 
     # Bank Arizona
-    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!='N/A')]
+    df_BA = df[(df['Source Type']=="bank (arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!='N/A')]
     
     # Paypal Arizona
-    df_PA = df[(df['Source Type']=="Paypal (Arizona)") &  (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!="N/A")]
+    df_PA = df[(df['Source Type']=="paypal (arizona)") &  (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!="N/A")]
 
     # Stripe (Arizona)
-    df_ST = df[(df['Source Type']=="Stripe (Arizona)")]
+    df_ST = df[(df['Source Type']=="stripe (arizona)")]
 
     # Paypal UK
-    df_UK = df[(df['Source Type']=="Paypal")]
+    df_UK = df[(df['Source Type']=="paypal")]
 
     # Bind
     df_income = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA,df_ST,df_UK])
@@ -155,32 +157,35 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     # Expense filter
     df = working_data[working_data['Debit Amount'].isnull()==False]
 
-    df['Audit expense'] = df['Audit expense'].str.lower() 
-
     exclude_transfers = ['Transfer to 500k','Transfer from 500K To NCM','Transfer to savings account','Grant (transfer) to 500k UK']
-
     exclude_transfers = list(map(lambda x : x.lower(),exclude_transfers))
 
     # Bank
-    df_Bank = df[(df['Source Type']=="BANK") & (df['Audit expense'].isin(exclude_transfers)==False)]
+    df_Bank = df[(df['Source Type']=="bank") & (df['Audit expense'].isin(exclude_transfers)==False)]
 
     # Savings Account
-    df_SA = df[(df['Source Type']=="Savings Account") & (df['Audit expense'].isin(exclude_transfers)==False)]
+    df_SA = df[(df['Source Type']=="savings account") & (df['Audit expense'].isin(exclude_transfers)==False)]
 
     # NCM
-    df_NCM = df[(df['Source Type']=="NCM") & (df['Audit expense'].isin(exclude_transfers)==False)]
+    df_NCM = df[(df['Source Type']=="ncm") & (df['Audit expense'].isin(exclude_transfers)==False)]
 
     # Bank (Arizona)
-    df_BA = df[(df['Source Type']=="Bank (Arizona)") & (df['Audit expense'].isin(exclude_transfers)==False)]
+    df_BA = df[(df['Source Type']=="bank (arizona)") & (df['Audit expense'].isin(exclude_transfers)==False)]
 
     # Paypal (Arizona)
-    df_PA = df[(df['Source Type']=="Paypal (Arizona)") & (df['Audit expense'].isin(exclude_transfers)==False)]
+    df_PA = df[(df['Source Type']=="paypal (arizona)") & (df['Audit expense'].isin(exclude_transfers)==False)]
 
     # Combine Expense filters
     df_expense = pd.concat([df_Bank,df_SA,df_NCM,df_BA,df_PA])
 
     # Combine Income and Expense
     df = pd.concat([df_income,df_expense])
+
+    # Reformat as title case
+    df['Renamer'] = df['Renamer'].str.title()
+    df['Audit Income'] = df['Audit Income'].str.title()
+    df['Audit expense'] = df['Audit expense'].str.title() 
+    df['Source Type'] = df['Source Type'].str.title() 
     
     # Return only first 16 columns
     df = df.iloc[:,:16]
