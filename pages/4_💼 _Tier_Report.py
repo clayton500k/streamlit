@@ -59,7 +59,9 @@ def tier_page():
     DM = DM[DM['Credit Amount']!=0] 
 
     # User Input Year
-    year_list = ['All',2018,2019,2020,2021,2022]
+    DM = DM.sort_values(by=['Y'])
+    year_list = DM['Y'].unique().tolist()
+    year_list.append('All') 
     select_year = st.selectbox('Select Year',year_list,year_list.index('All'))
 
     if select_year=='All':
