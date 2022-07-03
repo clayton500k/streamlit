@@ -34,7 +34,7 @@ def AgGrid_default(DF):
 
 def overall_page():
 
-    page_view = st.radio('Choose View:',['Income & Expenditure','Income by Source Type'],horizontal=True)
+    page_view = st.radio('Choose View:',['Income & Expenditure','Income by Source Type','Expense by Source Type'],horizontal=True)
 
     # Retrive data from session_state
     data = st.session_state.data
@@ -72,6 +72,24 @@ def overall_page():
         df5.columns = df5.columns.astype(str)
 
         AgGrid_default(df5)
+
+    elif page_view=='Expense by Source Type':
+
+        # Calculate Income by Year & Source Type
+        df6 = data[['Y','Debit Amount','Source Type']].groupby(['Y','Source Type']).sum().reset_index()
+        
+        # Plotly bar chart: https://plotly.com/python/bar-charts/
+        fig3 = px.bar(df6, x="Y", y="Debit Amount", color='Source Type', height=400)
+        
+        # Legend positioning: https://plotly.com/python/legend/
+        fig3 = fig3.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
+        
+        st.plotly_chart(fig3, use_container_width=True)
+
+        df7 = df6.pivot(index='Source Type',columns='Y',values='Debit Amount').reset_index().fillna(0)
+        df7.columns = df7.columns.astype(str)
+
+        AgGrid_default(df7) 
     
 
 st.set_page_config(page_title="Overall", page_icon="📈",layout='centered')
