@@ -87,10 +87,14 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     # Remove null Months
     df = df[df['Y'].isnull()==False]
     
-    dfDA = df['Debit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
-    df['Debit Amount'] = dfDA
-    dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
-    df['Credit Amount'] = dfCA
+    try:
+        dfDA = df['Debit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
+        df['Debit Amount'] = dfDA
+        dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
+        df['Credit Amount'] = dfCA
+    except:
+        sys.sleep(0.1)
+
     df['Y'] = pd.to_numeric(df['Y'])
     df['Y'] = df['Y'].astype(pd.Int32Dtype())
 
@@ -148,8 +152,8 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 
     # Paul Searle Override
     def override(x):
-        if (x=='Paul Searle (AquaAid)') | (x=='Kirsten Searle') :
-            x = 'Paul Searle'	
+        if (x=='paul searle (aquaaid)') | (x=='kirsten searle') :
+            x = 'paul searle'	
         return x
 
     df_income['Renamer'] = df_income['Renamer'].apply(override)
@@ -311,7 +315,7 @@ def run():
                     an = anonymize(tmp)
                     an.fake_names("Renamer")
                     if "giftaid_fake_name" not in st.session_state:
-                        st.session_state["giftaid_fake_name"] = tmp[tmp['Renamer']=='Gift Aid (HMRC Charities)']['Fake_Renamer'].tolist()[0]
+                        st.session_state["giftaid_fake_name"] = tmp[tmp['Renamer']=='Gift Aid (Hmrc Charities)']['Fake_Renamer'].tolist()[0]
                     tmp['Renamer'] = tmp['Fake_Renamer']
                     st.session_state["data"] = tmp
 
@@ -324,7 +328,7 @@ def run():
             # Remove Giftaid for Tier Report Data
             if 'TRD' not in st.session_state:
                 if st.session_state["username"]=="admin":
-                    st.session_state["TRD"] = DM[DM['Renamer']!='Gift Aid (HMRC Charities)']
+                    st.session_state["TRD"] = DM[DM['Renamer']!='Gift Aid (Hmrc Charities)']
                 else:
                     st.session_state["TRD"] = DM[DM['Renamer']!=st.session_state["giftaid_fake_name"]]
 
