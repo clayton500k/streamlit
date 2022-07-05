@@ -34,7 +34,7 @@ def AgGrid_default(DF):
 
 def overall_page():
 
-    page_view = st.radio('Choose View:',['Income & Expenditure','Income by Source Type','Expense by Source Type'],horizontal=True)
+    page_view = st.radio('Choose View:',['Income & Expenditure','Income by Source Type','Income by Core Vs Project','Expense by Source Type'],horizontal=True)
 
     # Retrive data from session_state
     data = st.session_state.data
@@ -90,6 +90,23 @@ def overall_page():
         df7.columns = df7.columns.astype(str)
 
         AgGrid_default(df7) 
+    elif page_view=='Income by Core Vs Project':
+
+        # Calculate Income by Year & Core/Project
+        df8 = data[['Y','Credit Amount','Core/Project']].groupby(['Y','Core/Project']).sum().reset_index()
+        
+        # Plotly bar chart: https://plotly.com/python/bar-charts/
+        fig2 = px.bar(df8, x="Y", y="Credit Amount", color='Core/Project', height=400)
+        
+        # Legend positioning: https://plotly.com/python/legend/
+        fig2 = fig2.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
+        
+        st.plotly_chart(fig2, use_container_width=True)
+
+        df9 = df8.pivot(index='Core/Project',columns='Y',values='Credit Amount').reset_index().fillna(0)
+        df9.columns = df9.columns.astype(str)
+
+        AgGrid_default(df9)
     
 
 st.set_page_config(page_title="Overall", page_icon="📈",layout='centered')
