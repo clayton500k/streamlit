@@ -136,7 +136,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df_B = df[df['Source Type']=="beacon"]
 
     # Bank Arizona
-    df_BA = df[(df['Source Type']=="bank (arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!='N/A')]
+    df_BA = df[(df['Source Type']=="bank (arizona)") &  (df['Renamer'] != 'paypal (arizona)') & (df['Renamer'] != 'stripe') & (df['Renamer']!='beacon (arizona)') & (df['Renamer']!='') & (df['Regular/Accrual']!='N/A')]
     
     # Paypal Arizona
     df_PA = df[(df['Source Type']=="paypal (arizona)") &  (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!="N/A")]
