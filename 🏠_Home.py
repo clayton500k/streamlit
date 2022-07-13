@@ -146,9 +146,12 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 
     # Paypal UK
     df_UK = df[(df['Source Type']=="paypal")]
+    
+    # Beacon Arizona
+    df_BAriz = df[(df['Source Type']=="beacon (arizona)")]
 
     # Bind
-    df_income = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA,df_ST,df_UK])
+    df_income = pd.concat([df_Bank,df_SA,df_NCM,df_CA,df_B,df_BA,df_PA,df_ST,df_UK,df_BAriz])
 
     # Paul Searle Override
     def override(x):
