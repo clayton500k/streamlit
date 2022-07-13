@@ -114,7 +114,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df = df[df['Credit Amount'].isnull()==False]
 
     exclude_transfers = ['Transfers from 500k','Transfers from NCM to 500k','Transfer from savings account','Transfer from 500k USA']
-    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe'] # ,'Gift Aid (HMRC Charities)','Transfer from 500k','500k Indiana']
+    exclude_sources = ['Go Cardless (Churchapp)','Go Cardless','Stripe','Paypal','Beacon (Arizona)'] # ,'Gift Aid (HMRC Charities)','Transfer from 500k','500k Indiana']
 
     # Convert exclude lists to lowercase
     exclude_transfers = list(map(lambda x : x.lower(),exclude_transfers))
