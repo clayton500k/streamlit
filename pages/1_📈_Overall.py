@@ -34,7 +34,7 @@ def AgGrid_default(DF):
 
 def overall_page():
 
-    page_view = st.radio('Choose View:',['Income & Expenditure','Income by Source Type','Income by Core Vs Project','Expense by Source Type'],horizontal=True)
+    page_view = st.radio('Choose View:',['Income & Expenditure','Income by Source Type','Income by Core Vs Project','Expenditure by Source Type'],horizontal=True)
 
     # Retrive data from session_state
     data = st.session_state.data
@@ -46,68 +46,60 @@ def overall_page():
         df3 = pd.melt(df2, id_vars = ['Y'], var_name='Group')
         
         # Plotly bar chart: https://plotly.com/python/bar-charts/
-        fig = px.bar(df3, x="Y", y="value", color='Group', barmode='group', height=400)
+        fig = px.bar(df3, x="Y", y="value", color='Group', barmode='group', labels={
+                     "value": str(page_view + " (" + st.session_state["currency_choice"] + ")")},height=400)
         
         # Legend positioning: https://plotly.com/python/legend/
         fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
-        
-        st.plotly_chart(fig, use_container_width=True)
-
-        AgGrid_default(df2)
-    
+            
     elif page_view=='Income by Source Type':
 
         # Calculate Income by Year & Source Type
         df4 = data[['Y','Credit Amount','Source Type']].groupby(['Y','Source Type']).sum().reset_index()
         
         # Plotly bar chart: https://plotly.com/python/bar-charts/
-        fig2 = px.bar(df4, x="Y", y="Credit Amount", color='Source Type', height=400)
+        fig = px.bar(df4, x="Y", y="Credit Amount", color='Source Type', labels={
+                     "Credit Amount": str("Income" + " (" + st.session_state["currency_choice"] + ")")},height=400)
         
         # Legend positioning: https://plotly.com/python/legend/
-        fig2 = fig2.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
-        
-        st.plotly_chart(fig2, use_container_width=True)
+        fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
 
-        df5 = df4.pivot(index='Source Type',columns='Y',values='Credit Amount').reset_index().fillna(0)
-        df5.columns = df5.columns.astype(str)
+        df2 = df4.pivot(index='Source Type',columns='Y',values='Credit Amount').reset_index().fillna(0)
+        df2.columns = df2.columns.astype(str)
 
-        AgGrid_default(df5)
-
-    elif page_view=='Expense by Source Type':
+    elif page_view=='Expenditure by Source Type':
 
         # Calculate Income by Year & Source Type
         df6 = data[['Y','Debit Amount','Source Type']].groupby(['Y','Source Type']).sum().reset_index()
         
         # Plotly bar chart: https://plotly.com/python/bar-charts/
-        fig3 = px.bar(df6, x="Y", y="Debit Amount", color='Source Type', height=400)
+        fig = px.bar(df6, x="Y", y="Debit Amount", color='Source Type', labels={
+                     "Debit Amount": str("Expenditure" + " (" + st.session_state["currency_choice"] + ")")},height=400)
         
         # Legend positioning: https://plotly.com/python/legend/
-        fig3 = fig3.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
-        
-        st.plotly_chart(fig3, use_container_width=True)
+        fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
 
-        df7 = df6.pivot(index='Source Type',columns='Y',values='Debit Amount').reset_index().fillna(0)
-        df7.columns = df7.columns.astype(str)
+        df2 = df6.pivot(index='Source Type',columns='Y',values='Debit Amount').reset_index().fillna(0)
+        df2.columns = df2.columns.astype(str)
 
-        AgGrid_default(df7) 
     elif page_view=='Income by Core Vs Project':
 
         # Calculate Income by Year & Core/Project
         df8 = data[['Y','Credit Amount','Core/Project']].groupby(['Y','Core/Project']).sum().reset_index()
         
         # Plotly bar chart: https://plotly.com/python/bar-charts/
-        fig2 = px.bar(df8, x="Y", y="Credit Amount", color='Core/Project', height=400)
+        fig = px.bar(df8, x="Y", y="Credit Amount", color='Core/Project',  labels={
+                     "Credit Amount": str("Income" + " (" + st.session_state["currency_choice"] + ")")},height=400)
         
         # Legend positioning: https://plotly.com/python/legend/
-        fig2 = fig2.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
-        
-        st.plotly_chart(fig2, use_container_width=True)
+        fig = fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0.15))
 
-        df9 = df8.pivot(index='Core/Project',columns='Y',values='Credit Amount').reset_index().fillna(0)
-        df9.columns = df9.columns.astype(str)
-
-        AgGrid_default(df9)
+        df2 = df8.pivot(index='Core/Project',columns='Y',values='Credit Amount').reset_index().fillna(0)
+        df2.columns = df2.columns.astype(str)
     
+    st.plotly_chart(fig, use_container_width=True)
+
+    AgGrid_default(df2)    
 
 st.set_page_config(page_title="Overall", page_icon="📈",layout='centered')
 
