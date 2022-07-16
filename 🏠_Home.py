@@ -194,7 +194,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df['Audit expense'] = df['Audit expense'].str.title() 
     df['Source Type'] = df['Source Type'].str.title() 
     
-    # Return only first 1 8columns
+    # Return only first 18 columns
     df = df.iloc[:,:18]
 
     # Add Date Column

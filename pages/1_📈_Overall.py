@@ -90,6 +90,7 @@ def overall_page():
         df7.columns = df7.columns.astype(str)
 
         AgGrid_default(df7) 
+
     elif page_view=='Income by Core Vs Project':
 
         # Calculate Income by Year & Core/Project
