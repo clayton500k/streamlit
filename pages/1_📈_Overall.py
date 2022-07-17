@@ -43,7 +43,8 @@ def overall_page():
 
         # Calculate Overall Income and Expenditure by Year         
         df2 = data[['Y','Credit Amount','Debit Amount']].groupby(['Y']).sum().reset_index()
-        df3 = pd.melt(df2, id_vars = ['Y'], var_name='Group')
+        df21=df2.rename(columns={'Credit Amount':'Income','Debit Amount':'Expenditure'})
+        df3 = pd.melt(df21, id_vars = ['Y'], var_name='Group')
         
         # Plotly bar chart: https://plotly.com/python/bar-charts/
         fig = px.bar(df3, x="Y", y="value", color='Group', barmode='group', height=400)
@@ -53,7 +54,7 @@ def overall_page():
         
         st.plotly_chart(fig, use_container_width=True)
 
-        AgGrid_default(df2)
+        AgGrid_default(df21)
     
     elif page_view=='Income by Source Type':
 
