@@ -214,7 +214,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 
     gbpusd = gbpusd[gbpusd['Month'].dt.day==1][['Month','Adj Close']]
     
-    df = pd.merge(df,gbpusd,how='left',on='Month')
+    df = pd.merge(df,gbpusd,how='left',on='Month').ffill()
     
     df['Credit Amount GBP'] =  df['Credit Amount']
     df['Credit Amount USD'] =  df['Credit Amount GBP'] * df['Adj Close']
