@@ -18,6 +18,7 @@ import time
 from datetime import datetime
 from anonymizedf.anonymizedf import anonymize
 import pandas_datareader as dr
+import sys
 
 #Googlesheets data obtained using the methodology below:
 #https://docs.streamlit.io/knowledge-base/tutorials/databases/private-gsheet
@@ -88,12 +89,12 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df = df[df['Y'].isnull()==False]
     
     try:
-        dfDA = df['Debit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
+        dfDA = df['Debit Amount'].apply(lambda x: StringToDec(x))
         df['Debit Amount'] = dfDA
-        dfCA = df['Credit Amount'].apply(lambda x: StringToDec(sub(r'[^\d.]', '', x)))
+        dfCA = df['Credit Amount'].apply(lambda x: StringToDec(x))
         df['Credit Amount'] = dfCA
     except:
-        sys.sleep(0.1)
+        None
 
     df['Y'] = pd.to_numeric(df['Y'])
     df['Y'] = df['Y'].astype(pd.Int32Dtype())
@@ -136,7 +137,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df_B = df[df['Source Type']=="beacon"]
 
     # Bank Arizona
-    df_BA = df[(df['Source Type']=="bank (arizona)") & (df['Renamer'] != "Paypal (Arizona)") & (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!='N/A')]
+    df_BA = df[(df['Source Type']=="bank (arizona)") & (df['Renamer'] != 'paypal (arizona)') & (df['Renamer'] != 'stripe') & (df['Renamer']!='beacon (arizona)') & (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!='N/A')]
     
     # Paypal Arizona
     df_PA = df[(df['Source Type']=="paypal (arizona)") &  (df['Renamer'].isnull()==False) & (df['Regular/Accrual']!="N/A")]
@@ -214,7 +215,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 
     gbpusd = gbpusd[gbpusd['Month'].dt.day==1][['Month','Adj Close']]
     
-    df = pd.merge(df,gbpusd,how='left',on='Month')
+    df = pd.merge(df,gbpusd,how='left',on='Month').ffill()
     
     df['Credit Amount GBP'] =  df['Credit Amount']
     df['Credit Amount USD'] =  df['Credit Amount GBP'] * df['Adj Close']
@@ -227,7 +228,11 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 def StringToDec(x):
     if x == '':
         return np.nan
+    elif x[0]=='-':
+        x = sub(r'[^\d.]', '', x)
+        return float(Decimal(x))*-1
     else:
+        x = sub(r'[^\d.]', '', x)
         return float(Decimal(x))
 
 def StringtoDate(x):
