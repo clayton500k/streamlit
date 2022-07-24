@@ -122,7 +122,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     exclude_sources = list(map(lambda x : x.lower(),exclude_sources))
 
     # Bank
-    df_Bank = df[(df['Source Type']=="bank") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & (df['Grant Partner'].isnull()) & (df['Regular/Accrual']!='N/A')]
+    df_Bank = df[(df['Source Type']=="bank") & (df['Audit Income'].isin(exclude_transfers)==False) & (df['Renamer'].isin(exclude_sources)==False) & (df['Regular/Accrual']!='N/A')]
     
     # Savings Account
     df_SA = df[(df['Source Type']=="savings account") & (df['Regular/Accrual']!='N/A') & (df['Audit Income'].isin(exclude_transfers)==False)]
