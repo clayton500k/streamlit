@@ -202,7 +202,7 @@ def get_data(gsheet_connector) -> pd.DataFrame:
     df['M'] = df['M'].apply(leading_zero)
     df['Month'] = df["Y"].astype(str) + df["M"].astype(str) + '01'
     df['Month'] = df['Month'].apply(StringtoDate)
-    df['Month'] = pd.to_datetime(df['Month'])
+    df['Month'] = pd.to_datetime(df['Month']).dt.to_period('M')
 
     # Select GBP or USD values
     # Currency rates downloaded from Yahoo Finance using: https://stackoverflow.com/a/66420251/18475595
@@ -211,13 +211,13 @@ def get_data(gsheet_connector) -> pd.DataFrame:
         
     # retrieve market data of current ticker symbol
     gbpusd = dr.data.DataReader('GBPUSD%3DX', data_source='yahoo', start=start_date, end=end_date).reset_index()
-    gbpusd['Month'] = pd.to_datetime(gbpusd['Date'])
+    gbpusd['Month'] = pd.to_datetime(gbpusd['Date']).dt.to_period('M')
 
-    gbpusd = gbpusd[gbpusd['Month'].dt.day==1][['Month','Adj Close']]
+    gbpusd = pd.DataFrame(gbpusd.groupby('Month')['Adj Close'].mean()).reset_index()
 
-    gbpusd = pd.merge(gbpusd,pd.DataFrame(df.Month.unique(),columns=['Month']),on='Month').ffill()
-    
-    df = pd.merge(df,gbpusd,how='left',on='Month')
+    #gbpusd = gbpusd[gbpusd['Month'].dt.day==1][['Month','Adj Close']]
+
+    df = pd.merge(df,gbpusd,on='Month',how='left').ffill()
     
     df['Credit Amount GBP'] =  df['Credit Amount']
     df['Credit Amount USD'] =  df['Credit Amount GBP'] * df['Adj Close']
